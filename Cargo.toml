@@ -5,3 +5,16 @@ authors = ["Richard Wiedenhöft <richard@wiedenhoeft.xyz>"]
 edition = "2018"
 
 [dependencies]
+
+[build-dependencies]
+bindgen = "0.52"
+pkg-config = "0.3"
+
+[features]
+default = ["fuse_26"]
+
+fuse_11 = []
+fuse_21 = []
+fuse_22 = []
+fuse_25 = []
+fuse_26 = []
