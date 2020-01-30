@@ -31,18 +31,10 @@ fn main() {
     version!(api_version, "fuse_30", 30);
     version!(api_version, "fuse_31", 31);
     version!(api_version, "fuse_35", 35);
-    // Fallback to a default version if necessary
-    let default_api_version = 26_u32;
-    let api_version = match api_version {
-        Some(x) => x,
-        None => {
-            println!(
-                "cargo:warning=No FUSE API version feature selected. Falling back to fuse_{}.",
-                default_api_version
-            );
-            default_api_version
-        }
-    };
+    // Warn if no API version is selected
+    if api_version.is_none() {
+        println!("cargo:warning=No FUSE API version feature selected.");
+    }
 
     // Find libfuse
     let fuse_lib = pkg_config::Config::new()
@@ -60,7 +52,7 @@ fn main() {
     }
     let fuse_header_path = fuse_header_path.expect("Cannot find fuse.h");
 
-    // Generate bindings
+    // Configure bindgen builder
     let include_flags = fuse_lib
         .include_paths
         .iter()
@@ -69,7 +61,7 @@ fn main() {
         Some(val) => format!("-D{}={}", key, val),
         None => format!("-D{}", key),
     });
-    let bindings = bindgen::builder()
+    let builder = bindgen::builder()
         .header(fuse_header_path.to_str().unwrap())
         .whitelist_recursively(false)
         .whitelist_type("^fuse.*")
@@ -80,8 +72,15 @@ fn main() {
         .derive_debug(true)
         .clang_args(include_flags)
         .clang_args(define_flags)
-        .clang_arg(format!("-DFUSE_USE_VERSION={}", api_version))
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks));
+    let builder = if let Some(api_version) = api_version {
+        builder.clang_arg(format!("-DFUSE_USE_VERSION={}", api_version))
+    } else {
+        builder
+    };
+
+    // Generate bindings
+    let bindings = builder
         .generate()
         .expect("Failed to generate FUSE bindings");
     bindings
