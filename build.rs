@@ -55,9 +55,10 @@ fn main() {
     });
     let bindings = bindgen::builder()
         .header(fuse_header_path.to_str().unwrap())
-        .whitelist_type("fuse.*")
-        .whitelist_function("fuse.*")
-        .whitelist_var("fuse.*")
+        .whitelist_recursively(false)
+        .whitelist_type("^fuse.*")
+        .whitelist_function("^fuse.*")
+        .whitelist_var("^fuse.*")
         .derive_default(true)
         .derive_copy(true)
         .derive_debug(true)

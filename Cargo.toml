@@ -5,6 +5,7 @@ authors = ["Richard Wiedenhöft <richard@wiedenhoeft.xyz>"]
 edition = "2018"
 
 [dependencies]
+libc = "*"
 
 [build-dependencies]
 bindgen = "0.52"
