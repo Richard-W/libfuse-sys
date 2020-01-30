@@ -12,10 +12,14 @@ bindgen = "0.52"
 pkg-config = "0.3"
 
 [features]
-default = ["fuse_26"]
+default = []
 
 fuse_11 = []
 fuse_21 = []
 fuse_22 = []
 fuse_25 = []
 fuse_26 = []
+fuse_29 = []
+fuse_30 = []
+fuse_31 = []
+fuse_35 = []

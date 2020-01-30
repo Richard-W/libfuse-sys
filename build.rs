@@ -20,13 +20,29 @@ fn main() {
     let out_dir = path::PathBuf::from(env::var("OUT_DIR").unwrap());
 
     // Get the API version and panic if more than one is declared
+    #[allow(unused_mut)]
     let mut api_version: Option<u32> = None;
     version!(api_version, "fuse_11", 11);
     version!(api_version, "fuse_21", 21);
     version!(api_version, "fuse_22", 22);
     version!(api_version, "fuse_25", 25);
     version!(api_version, "fuse_26", 26);
-    let api_version = api_version.expect("No FUSE API version feature enabled");
+    version!(api_version, "fuse_29", 29);
+    version!(api_version, "fuse_30", 30);
+    version!(api_version, "fuse_31", 31);
+    version!(api_version, "fuse_35", 35);
+    // Fallback to a default version if necessary
+    let default_api_version = 26_u32;
+    let api_version = match api_version {
+        Some(x) => x,
+        None => {
+            println!(
+                "cargo:warning=No FUSE API version feature selected. Falling back to fuse_{}.",
+                default_api_version
+            );
+            default_api_version
+        }
+    };
 
     // Find libfuse
     let fuse_lib = pkg_config::Config::new()
