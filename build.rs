@@ -50,15 +50,19 @@ fn main() {
         .expect("Failed to find libfuse");
 
     // Find fuse.h header
-    let mut fuse_header_path: Option<path::PathBuf> = None;
+    let mut fuse_include_path: Option<path::PathBuf> = None;
     for include_path in fuse_lib.include_paths.iter() {
         let test_path = include_path.join("fuse.h");
         if test_path.exists() {
-            fuse_header_path = Some(test_path);
+            fuse_include_path = Some(include_path.clone());
             break;
         }
     }
-    let fuse_header_path = fuse_header_path.expect("Cannot find fuse.h");
+    let fuse_include_path = fuse_include_path.expect("Cannot find FUSE include path");
+    let fuse_hl_header_path = fuse_include_path.join("fuse.h");
+    let fuse_ll_header_path = fuse_include_path.join("fuse_lowlevel.h");
+    assert!(fuse_hl_header_path.exists());
+    assert!(fuse_ll_header_path.exists());
 
     // Configure bindgen builder
     let include_flags = fuse_lib
@@ -70,7 +74,8 @@ fn main() {
         None => format!("-D{}", key),
     });
     let builder = bindgen::builder()
-        .header(fuse_header_path.to_str().unwrap())
+        .header(fuse_hl_header_path.to_str().unwrap())
+        .header(fuse_ll_header_path.to_str().unwrap())
         .whitelist_recursively(false)
         .whitelist_type("^fuse.*")
         .whitelist_function("^fuse.*")
