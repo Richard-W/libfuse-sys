@@ -1,8 +1,15 @@
 [package]
 name = "libfuse-sys"
 version = "0.1.0"
+description = "Raw bindings to libfuse"
+repository = "https://github.com/richard-w/libfuse-sys"
 authors = ["Richard Wiedenhöft <richard@wiedenhoeft.xyz>"]
+license = "MIT AND LGPL-2.0-or-later"
+categories = ["external-ffi-bindings"]
+keywords = ["fuse", "bindings", "filesystem", "fs"]
+readme = "README.md"
 edition = "2018"
+build = "build.rs"
 
 [dependencies]
 libc = "*"
