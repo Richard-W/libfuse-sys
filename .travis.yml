@@ -1,14 +1,30 @@
+os: linux
 dist: bionic
 addons:
   apt:
     packages:
-    - libfuse-dev
+      - libfuse-dev
+
 language: rust
 rust:
   - stable
   - beta
   - nightly
+
 matrix:
+  include:
+    - name: fmt
+      rust: stable
+      before_script:
+        - rustup component add rustfmt
+      script:
+        - cargo fmt --all -- --check
+    - name: clippy
+      rust: stable
+      before_script:
+        - rustup component add clippy
+      script:
+        - cargo clippy --all --lib --tests -- --deny warnings
   allow_failures:
     - rust: nightly
   fast_finish: true
