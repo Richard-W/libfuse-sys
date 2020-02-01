@@ -25,6 +25,7 @@ fn main() {
     version!(api_version, "fuse_11", 11);
     version!(api_version, "fuse_21", 21);
     version!(api_version, "fuse_22", 22);
+    version!(api_version, "fuse_24", 24);
     version!(api_version, "fuse_25", 25);
     version!(api_version, "fuse_26", 26);
     version!(api_version, "fuse_29", 29);

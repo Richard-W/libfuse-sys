@@ -21,6 +21,7 @@ You can select other API versions for fuse. Currently supported are
 * `fuse_11`
 * `fuse_21`
 * `fuse_22`
+* `fuse_24`
 * `fuse_25`
 * `fuse_26`
 * `fuse_29`
