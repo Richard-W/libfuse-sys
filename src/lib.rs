@@ -6,16 +6,24 @@
 
 use libc::*;
 
-include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+pub mod fuse {
+    use super::*;
+    include!(concat!(env!("OUT_DIR"), "/fuse.rs"));
 
-/// Main function of FUSE
-///
-/// Implemented as a macro in the original fuse header.
-pub unsafe fn fuse_main(
-    argc: c_int,
-    argv: *mut *mut c_char,
-    op: *const fuse_operations,
-    user_data: *mut c_void,
-) -> c_int {
-    fuse_main_real(argc, argv, op, std::mem::size_of_val(&*op), user_data)
+    /// Main function of FUSE
+    ///
+    /// Implemented as a macro in the original fuse header.
+    pub unsafe fn fuse_main(
+        argc: c_int,
+        argv: *mut *mut c_char,
+        op: *const fuse_operations,
+        user_data: *mut c_void,
+    ) -> c_int {
+        fuse_main_real(argc, argv, op, std::mem::size_of_val(&*op), user_data)
+    }
+}
+
+pub mod fuse_lowlevel {
+    use super::*;
+    include!(concat!(env!("OUT_DIR"), "/fuse_lowlevel.rs"));
 }

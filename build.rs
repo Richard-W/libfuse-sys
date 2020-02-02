@@ -2,7 +2,8 @@ extern crate bindgen;
 extern crate pkg_config;
 
 use std::env;
-use std::path;
+use std::iter;
+use std::path::PathBuf;
 
 const FUSE_DEFAULT_API_VERSION: u32 = 26;
 
@@ -18,9 +19,73 @@ macro_rules! version {
     };
 }
 
-fn main() {
-    let out_dir = path::PathBuf::from(env::var("OUT_DIR").unwrap());
+fn generate_fuse_bindings(header: &str, api_version: u32, fuse_lib: &pkg_config::Library) {
+    // Find header file
+    let mut header_path: Option<PathBuf> = None;
+    for include_path in fuse_lib.include_paths.iter() {
+        let test_path = include_path.join(header);
+        if test_path.exists() {
+            header_path = Some(test_path);
+            break;
+        }
+    }
+    let header_path = header_path
+        .expect(&format!("Cannot find {}", header))
+        .to_str()
+        .expect(&format!(
+            "Path to {} contains invalid unicode characters",
+            header
+        ))
+        .to_string();
 
+    // Gather fuse defines
+    let defines = fuse_lib.defines.iter().map(|(key, val)| match val {
+        Some(val) => format!("-D{}={}", key, val),
+        None => format!("-D{}", key),
+    });
+    // Gather include paths
+    let includes = fuse_lib
+        .include_paths
+        .iter()
+        .map(|dir| format!("-I{}", dir.display()));
+    // API version definition
+    let api_define = iter::once(format!("-DFUSE_USE_VERSION={}", api_version));
+    // Chain compile flags
+    let compile_flags = defines.chain(includes).chain(api_define);
+
+    // Create bindgen builder
+    let builder = bindgen::builder();
+    // Add clang flags
+    let builder = builder.clang_args(compile_flags);
+    // Derive Debug, Copy and Default
+    let builder = builder
+        .derive_default(true)
+        .derive_copy(true)
+        .derive_debug(true);
+    // Whitelist "fuse_*" symbols and blacklist everything else
+    let builder = builder
+        .whitelist_recursively(false)
+        .whitelist_type("^fuse.*")
+        .whitelist_function("^fuse.*")
+        .whitelist_var("^fuse.*");
+    // Add CargoCallbacks so build.rs is rerun on header changes
+    let builder = builder.parse_callbacks(Box::new(bindgen::CargoCallbacks));
+
+    // Generate bindings
+    let bindings = builder
+        .header(header_path)
+        .generate()
+        .expect(&format!("Failed to generate {} bindings", header));
+
+    // Write bindings to file
+    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let bindings_path = out_dir.join(&header.replace(".h", ".rs"));
+    bindings
+        .write_to_file(&bindings_path)
+        .expect(&format!("Failed to write {}", bindings_path.display()));
+}
+
+fn main() {
     // Get the API version and panic if more than one is declared
     #[allow(unused_mut)]
     let mut api_version: Option<u32> = None;
@@ -49,50 +114,8 @@ fn main() {
         .probe("fuse")
         .expect("Failed to find libfuse");
 
-    // Find fuse.h header
-    let mut fuse_include_path: Option<path::PathBuf> = None;
-    for include_path in fuse_lib.include_paths.iter() {
-        let test_path = include_path.join("fuse.h");
-        if test_path.exists() {
-            fuse_include_path = Some(include_path.clone());
-            break;
-        }
-    }
-    let fuse_include_path = fuse_include_path.expect("Cannot find FUSE include path");
-    let fuse_hl_header_path = fuse_include_path.join("fuse.h");
-    let fuse_ll_header_path = fuse_include_path.join("fuse_lowlevel.h");
-    assert!(fuse_hl_header_path.exists());
-    assert!(fuse_ll_header_path.exists());
-
-    // Configure bindgen builder
-    let include_flags = fuse_lib
-        .include_paths
-        .iter()
-        .map(|path| format!("-I{}", path.display()));
-    let define_flags = fuse_lib.defines.iter().map(|(key, val)| match val {
-        Some(val) => format!("-D{}={}", key, val),
-        None => format!("-D{}", key),
-    });
-    let builder = bindgen::builder()
-        .header(fuse_hl_header_path.to_str().unwrap())
-        .header(fuse_ll_header_path.to_str().unwrap())
-        .whitelist_recursively(false)
-        .whitelist_type("^fuse.*")
-        .whitelist_function("^fuse.*")
-        .whitelist_var("^fuse.*")
-        .derive_default(true)
-        .derive_copy(true)
-        .derive_debug(true)
-        .clang_args(include_flags)
-        .clang_args(define_flags)
-        .clang_arg(format!("-DFUSE_USE_VERSION={}", api_version))
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks));
-
-    // Generate bindings
-    let bindings = builder
-        .generate()
-        .expect("Failed to generate FUSE bindings");
-    bindings
-        .write_to_file(out_dir.join("bindings.rs"))
-        .expect("Failed to write FUSE bindings");
+    // Generate highlevel bindings
+    generate_fuse_bindings("fuse.h", api_version, &fuse_lib);
+    // Generate lowlevel bindings
+    generate_fuse_bindings("fuse_lowlevel.h", api_version, &fuse_lib);
 }
