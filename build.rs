@@ -30,12 +30,9 @@ fn generate_fuse_bindings(header: &str, api_version: u32, fuse_lib: &pkg_config:
         }
     }
     let header_path = header_path
-        .expect(&format!("Cannot find {}", header))
+        .unwrap_or_else(|| panic!("Cannot find {}", header))
         .to_str()
-        .expect(&format!(
-            "Path to {} contains invalid unicode characters",
-            header
-        ))
+        .unwrap_or_else(|| panic!("Path to {} contains invalid unicode characters", header))
         .to_string();
 
     // Gather fuse defines
@@ -75,14 +72,14 @@ fn generate_fuse_bindings(header: &str, api_version: u32, fuse_lib: &pkg_config:
     let bindings = builder
         .header(header_path)
         .generate()
-        .expect(&format!("Failed to generate {} bindings", header));
+        .unwrap_or_else(|_| panic!("Failed to generate {} bindings", header));
 
     // Write bindings to file
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let bindings_path = out_dir.join(&header.replace(".h", ".rs"));
     bindings
         .write_to_file(&bindings_path)
-        .expect(&format!("Failed to write {}", bindings_path.display()));
+        .unwrap_or_else(|_| panic!("Failed to write {}", bindings_path.display()));
 }
 
 fn main() {
