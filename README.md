@@ -21,6 +21,7 @@ You can select other API versions for fuse. Currently supported are
 * `fuse_11`
 * `fuse_21`
 * `fuse_22`
+* `fuse_24`
 * `fuse_25`
 * `fuse_26`
 * `fuse_29`
@@ -28,8 +29,7 @@ You can select other API versions for fuse. Currently supported are
 * `fuse_31`
 * `fuse_35`
 
-If no version is selected the default version of your installed libfuse is
-used (no `FUSE_USE_VERSION` value is set).
+If no version is selected the crate defaults to version 26.
 
 ## License
 

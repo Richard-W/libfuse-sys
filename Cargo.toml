@@ -20,11 +20,18 @@ bindgen = "0.52"
 pkg-config = "0.3"
 
 [features]
-default = []
+default = ["fuse_highlevel", "fuse_lowlevel"]
 
+# Generate highlevel bindings
+fuse_highlevel = []
+# Generate lowlevel bindings
+fuse_lowlevel = []
+
+# API versions
 fuse_11 = []
 fuse_21 = []
 fuse_22 = []
+fuse_24 = []
 fuse_25 = []
 fuse_26 = []
 fuse_29 = []
