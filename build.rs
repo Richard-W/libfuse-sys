@@ -115,7 +115,9 @@ fn main() {
         .expect("Failed to find libfuse");
 
     // Generate highlevel bindings
+    #[cfg(feature = "fuse_highlevel")]
     generate_fuse_bindings("fuse.h", api_version, &fuse_lib);
     // Generate lowlevel bindings
+    #[cfg(feature = "fuse_lowlevel")]
     generate_fuse_bindings("fuse_lowlevel.h", api_version, &fuse_lib);
 }

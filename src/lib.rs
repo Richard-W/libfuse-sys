@@ -6,6 +6,7 @@
 
 use libc::*;
 
+#[cfg(feature = "fuse_highlevel")]
 pub mod fuse {
     use super::*;
     include!(concat!(env!("OUT_DIR"), "/fuse.rs"));
@@ -23,6 +24,7 @@ pub mod fuse {
     }
 }
 
+#[cfg(feature = "fuse_lowlevel")]
 pub mod fuse_lowlevel {
     use super::*;
     include!(concat!(env!("OUT_DIR"), "/fuse_lowlevel.rs"));
