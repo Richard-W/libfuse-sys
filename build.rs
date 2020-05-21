@@ -51,22 +51,25 @@ fn generate_fuse_bindings(header: &str, api_version: u32, fuse_lib: &pkg_config:
     let compile_flags = defines.chain(includes).chain(api_define);
 
     // Create bindgen builder
-    let builder = bindgen::builder();
-    // Add clang flags
-    let builder = builder.clang_args(compile_flags);
-    // Derive Debug, Copy and Default
-    let builder = builder
+    let mut builder = bindgen::builder()
+        // Add clang flags
+        .clang_args(compile_flags)
+        // Derive Debug, Copy and Default
         .derive_default(true)
         .derive_copy(true)
-        .derive_debug(true);
-    // Whitelist "fuse_*" symbols and blacklist everything else
-    let builder = builder
+        .derive_debug(true)
+        // Add CargoCallbacks so build.rs is rerun on header changes
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+        // Whitelist "fuse_*" symbols and blacklist everything else
         .whitelist_recursively(false)
         .whitelist_type("^fuse.*")
         .whitelist_function("^fuse.*")
         .whitelist_var("^fuse.*");
-    // Add CargoCallbacks so build.rs is rerun on header changes
-    let builder = builder.parse_callbacks(Box::new(bindgen::CargoCallbacks));
+
+    if cfg!(target_os = "macos") {
+        // osxfuse needs this type
+        builder = builder.whitelist_type("setattr_x");
+    }
 
     // Generate bindings
     let bindings = builder
