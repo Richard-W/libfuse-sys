@@ -1,6 +1,6 @@
 [package]
 name = "libfuse-sys"
-version = "0.2.1"
+version = "0.2.2"
 description = "Raw bindings to libfuse"
 repository = "https://github.com/richard-w/libfuse-sys"
 authors = ["Richard Wiedenhöft <richard@wiedenhoeft.xyz>"]
