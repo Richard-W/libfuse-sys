@@ -62,9 +62,9 @@ fn generate_fuse_bindings(header: &str, api_version: u32, fuse_lib: &pkg_config:
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         // Whitelist "fuse_*" symbols and blacklist everything else
         .whitelist_recursively(false)
-        .whitelist_type("^fuse.*")
-        .whitelist_function("^fuse.*")
-        .whitelist_var("^fuse.*");
+        .whitelist_type("(?i)^fuse.*")
+        .whitelist_function("(?i)^fuse.*")
+        .whitelist_var("(?i)^fuse.*");
 
     if cfg!(target_os = "macos") {
         // osxfuse needs this type
