@@ -10,7 +10,7 @@ keywords = ["fuse", "bindings", "filesystem", "fs"]
 readme = "README.md"
 edition = "2018"
 build = "build.rs"
-publish = false
+publish = true
 
 [dependencies]
 libc = "0.2"
