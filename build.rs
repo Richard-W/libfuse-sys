@@ -63,6 +63,7 @@ fn generate_fuse_bindings(header: &str, api_version: u32, fuse_lib: &pkg_config:
         // Whitelist "fuse_*" symbols and blacklist everything else
         .whitelist_recursively(false)
         .whitelist_type("(?i)^fuse.*")
+        .whitelist_type("__va_list_tag")
         .whitelist_function("(?i)^fuse.*")
         .whitelist_var("(?i)^fuse.*");
 
@@ -99,6 +100,7 @@ fn main() {
     version!(api_version, "fuse_30", 30);
     version!(api_version, "fuse_31", 31);
     version!(api_version, "fuse_35", 35);
+    version!(api_version, "fuse_310", 310);
     // Warn if no API version is selected
     if api_version.is_none() {
         println!(
@@ -110,8 +112,10 @@ fn main() {
     let api_version = api_version.unwrap_or(FUSE_DEFAULT_API_VERSION);
 
     // Find libfuse
-    let fuse_lib = pkg_config::Config::new()
+    let pkg_config_config = pkg_config::Config::new();
+    let fuse_lib = pkg_config_config
         .probe("fuse")
+        .or_else(|_| pkg_config_config.probe("fuse3"))
         .expect("Failed to find libfuse");
 
     // Generate highlevel bindings
