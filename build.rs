@@ -114,8 +114,8 @@ fn main() {
     // Find libfuse
     let pkg_config_config = pkg_config::Config::new();
     let fuse_lib = pkg_config_config
-        .probe("fuse")
-        .or_else(|_| pkg_config_config.probe("fuse3"))
+        .probe("fuse3")
+        .or_else(|_| pkg_config_config.probe("fuse"))
         .expect("Failed to find libfuse");
 
     // Generate highlevel bindings
