@@ -64,7 +64,10 @@ fn generate_fuse_bindings(header: &str, api_version: u32, fuse_lib: &pkg_config:
         .whitelist_recursively(false)
         .whitelist_type("(?i)^fuse.*")
         .whitelist_function("(?i)^fuse.*")
-        .whitelist_var("(?i)^fuse.*");
+        .whitelist_var("(?i)^fuse.*")
+        .blacklist_type("fuse_log_func_t")
+        .blacklist_function("fuse_set_log_func");
+    // TODO: properly bind fuse_log_func_t and whitelist fuse_set_log_func again
 
     if cfg!(target_os = "macos") {
         // osxfuse needs this type
