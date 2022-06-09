@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - staging
+      - trying
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-ubuntu-fuse2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install libfuse-dev
+        run: sudo apt-get install -y libfuse-dev
+
+      - name: Build
+        run: cargo build --features fuse_26 --verbose
+
+  build-ubuntu-fuse3:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install libfuse3-dev
+        run: sudo apt-get install -y libfuse3-dev
+
+      - name: Build
+        run: cargo build --features fuse_35 --verbose
+
+
+  build-macos:
+    runs-on: macOS-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install osxfuse
+        run: brew install osxfuse
+
+      - name: Build
+        run: cargo build --verbose
