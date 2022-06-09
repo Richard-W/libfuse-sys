@@ -56,8 +56,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Install libfuse3-dev
-        run: sudo apt-get install -y libfuse3-dev
+      - name: Install libfuse-dev
+        run: sudo apt-get install -y libfuse-dev
 
       - name: Run clippy
         run: cargo clippy --verbose --all --lib --tests -- --deny warnings
