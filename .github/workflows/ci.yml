@@ -49,15 +49,3 @@ jobs:
 
       - name: Build
         run: cargo build --verbose
-
-  clippy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Install libfuse-dev
-        run: sudo apt-get install -y libfuse-dev
-
-      - name: Run clippy
-        run: cargo clippy --verbose --all --lib --tests -- --deny warnings

@@ -2,5 +2,4 @@ status = [
   "build-ubuntu-fuse2",
   "build-ubuntu-fuse3",
   "build-macos",
-  "clippy",
 ]
