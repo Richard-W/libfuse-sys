@@ -1,6 +1,6 @@
 [package]
 name = "libfuse-sys"
-version = "0.3.0"
+version = "0.4.0"
 description = "Raw bindings to libfuse"
 repository = "https://github.com/richard-w/libfuse-sys"
 authors = ["Richard Wiedenhöft <richard@wiedenhoeft.xyz>"]
@@ -16,7 +16,7 @@ publish = false
 libc = "0.2"
 
 [build-dependencies]
-bindgen = "0.52"
+bindgen = "0.60"
 pkg-config = "0.3"
 
 [features]
