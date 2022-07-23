@@ -60,18 +60,18 @@ fn generate_fuse_bindings(header: &str, api_version: u32, fuse_lib: &pkg_config:
         .derive_debug(true)
         // Add CargoCallbacks so build.rs is rerun on header changes
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
-        // Whitelist "fuse_*" symbols and blacklist everything else
-        .whitelist_recursively(false)
-        .whitelist_type("(?i)^fuse.*")
-        .whitelist_function("(?i)^fuse.*")
-        .whitelist_var("(?i)^fuse.*")
-        .blacklist_type("fuse_log_func_t")
-        .blacklist_function("fuse_set_log_func");
-    // TODO: properly bind fuse_log_func_t and whitelist fuse_set_log_func again
+        // Whitelist "fuse_*" symbols and blocklist everything else
+        .allowlist_recursively(false)
+        .allowlist_type("(?i)^fuse.*")
+        .allowlist_function("(?i)^fuse.*")
+        .allowlist_var("(?i)^fuse.*")
+        .blocklist_type("fuse_log_func_t")
+        .blocklist_function("fuse_set_log_func");
+    // TODO: properly bind fuse_log_func_t and allowlist fuse_set_log_func again
 
     if cfg!(target_os = "macos") {
         // osxfuse needs this type
-        builder = builder.whitelist_type("setattr_x");
+        builder = builder.allowlist_type("setattr_x");
     }
 
     // Generate bindings
