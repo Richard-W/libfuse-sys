@@ -5,7 +5,7 @@ use std::env;
 use std::iter;
 use std::path::PathBuf;
 
-const FUSE_DEFAULT_API_VERSION: u32 = 26;
+const FUSE_DEFAULT_API_VERSION: u32 = 30;
 
 macro_rules! version {
     ($version_var:ident, $feature:literal, $version:literal) => {
