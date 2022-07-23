@@ -16,7 +16,7 @@ publish = false
 libc = "0.2"
 
 [build-dependencies]
-bindgen = "0.52"
+bindgen = "0.60"
 pkg-config = "0.3"
 
 [features]
