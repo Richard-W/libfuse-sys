@@ -19,7 +19,39 @@ macro_rules! version {
     };
 }
 
-fn generate_fuse_bindings(header: &str, api_version: u32, fuse_lib: &pkg_config::Library) {
+fn fuse_binding_filter(builder: bindgen::Builder) -> bindgen::Builder {
+    let mut builder = builder
+        // Whitelist "fuse_*" symbols and blocklist everything else
+        .allowlist_recursively(false)
+        .allowlist_type("(?i)^fuse.*")
+        .allowlist_function("(?i)^fuse.*")
+        .allowlist_var("(?i)^fuse.*")
+        .blocklist_type("fuse_log_func_t")
+        .blocklist_function("fuse_set_log_func");
+    // TODO: properly bind fuse_log_func_t and allowlist fuse_set_log_func again
+
+    if cfg!(target_os = "macos") {
+        // osxfuse needs this type
+        builder = builder.allowlist_type("setattr_x");
+    }
+    builder
+}
+
+fn cuse_binding_filter(builder: bindgen::Builder) -> bindgen::Builder {
+    builder
+        // Whitelist "cuse_*" symbols and blocklist everything else
+        .allowlist_recursively(false)
+        .allowlist_type("(?i)^cuse.*")
+        .allowlist_function("(?i)^cuse.*")
+        .allowlist_var("(?i)^cuse.*")
+}
+
+fn generate_fuse_bindings(
+    header: &str,
+    api_version: u32,
+    fuse_lib: &pkg_config::Library,
+    binding_filter: fn(bindgen::Builder) -> bindgen::Builder,
+) {
     // Find header file
     let mut header_path: Option<PathBuf> = None;
     for include_path in fuse_lib.include_paths.iter() {
@@ -59,20 +91,9 @@ fn generate_fuse_bindings(header: &str, api_version: u32, fuse_lib: &pkg_config:
         .derive_copy(true)
         .derive_debug(true)
         // Add CargoCallbacks so build.rs is rerun on header changes
-        .parse_callbacks(Box::new(bindgen::CargoCallbacks))
-        // Whitelist "fuse_*" symbols and blocklist everything else
-        .allowlist_recursively(false)
-        .allowlist_type("(?i)^fuse.*")
-        .allowlist_function("(?i)^fuse.*")
-        .allowlist_var("(?i)^fuse.*")
-        .blocklist_type("fuse_log_func_t")
-        .blocklist_function("fuse_set_log_func");
-    // TODO: properly bind fuse_log_func_t and allowlist fuse_set_log_func again
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks));
 
-    if cfg!(target_os = "macos") {
-        // osxfuse needs this type
-        builder = builder.allowlist_type("setattr_x");
-    }
+    builder = binding_filter(builder);
 
     // Generate bindings
     let bindings = builder
@@ -116,7 +137,10 @@ fn main() {
     let try_fuse_lib = pkg_config::Config::new().probe("fuse");
     let try_fuse3_lib = pkg_config::Config::new().probe("fuse3");
     let fuse_lib = match (try_fuse_lib, try_fuse3_lib) {
-        (Err(err), Err(err3)) => panic!("Failed to find pkg-config modules fuse ({}) or fuse3 ({})", err, err3),
+        (Err(err), Err(err3)) => panic!(
+            "Failed to find pkg-config modules fuse ({}) or fuse3 ({})",
+            err, err3
+        ),
         (Ok(fuse_lib), Err(_)) => fuse_lib,
         (Err(_), Ok(fuse3_lib)) => fuse3_lib,
         (Ok(fuse_lib), Ok(fuse3_lib)) => {
@@ -132,8 +156,21 @@ fn main() {
 
     // Generate highlevel bindings
     #[cfg(feature = "fuse_highlevel")]
-    generate_fuse_bindings("fuse.h", api_version, &fuse_lib);
+    generate_fuse_bindings("fuse.h", api_version, &fuse_lib, fuse_binding_filter);
     // Generate lowlevel bindings
     #[cfg(feature = "fuse_lowlevel")]
-    generate_fuse_bindings("fuse_lowlevel.h", api_version, &fuse_lib);
+    generate_fuse_bindings(
+        "fuse_lowlevel.h",
+        api_version,
+        &fuse_lib,
+        fuse_binding_filter,
+    );
+    // Generate lowlevel cuse bindings
+    #[cfg(feature = "cuse_lowlevel")]
+    generate_fuse_bindings(
+        "cuse_lowlevel.h",
+        api_version,
+        &fuse_lib,
+        cuse_binding_filter,
+    );
 }
