@@ -3,9 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - master
-      - staging
-      - trying
+      - '**'
     tags:
       - '*'
   pull_request:
@@ -38,8 +36,8 @@ jobs:
         run: cargo build --features fuse_35 --verbose
 
 
-  build-macos:
-    runs-on: macOS-latest
+  build-macos-11:
+    runs-on: macos-11
     steps:
       - name: Checkout
         uses: actions/checkout@v2
