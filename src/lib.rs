@@ -30,3 +30,12 @@ pub mod fuse_lowlevel {
     use super::*;
     include!(concat!(env!("OUT_DIR"), "/fuse_lowlevel.rs"));
 }
+
+#[cfg(feature = "cuse_lowlevel")]
+pub mod cuse_lowlevel {
+    use super::*;
+    use fuse_lowlevel::{
+        fuse_args, fuse_conn_info, fuse_file_info, fuse_pollhandle, fuse_req_t, fuse_session,
+    };
+    include!(concat!(env!("OUT_DIR"), "/cuse_lowlevel.rs"));
+}

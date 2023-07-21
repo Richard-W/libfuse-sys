@@ -21,10 +21,12 @@ pkg-config = "0.3"
 [features]
 default = ["fuse_highlevel", "fuse_lowlevel"]
 
-# Generate highlevel bindings
+# Generate highlevel fuse bindings
 fuse_highlevel = []
-# Generate lowlevel bindings
+# Generate lowlevel fuse bindings
 fuse_lowlevel = []
+# Generate lowlevel cuse bindings
+cuse_lowlevel = []
 
 # API versions
 fuse_11 = []
