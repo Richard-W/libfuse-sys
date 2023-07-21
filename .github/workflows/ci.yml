@@ -3,9 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - master
-      - staging
-      - trying
+      - '**'
     tags:
       - '*'
   pull_request:
