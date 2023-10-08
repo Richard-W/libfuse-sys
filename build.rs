@@ -133,26 +133,30 @@ fn main() {
     // Fall back to default version
     let api_version = api_version.unwrap_or(FUSE_DEFAULT_API_VERSION);
 
+    let mut pkgcfg = pkg_config::Config::new();
+    pkgcfg.cargo_metadata(false);
+
     // Find libfuse
-    let try_fuse_lib = pkg_config::Config::new().probe("fuse");
-    let try_fuse3_lib = pkg_config::Config::new().probe("fuse3");
+    let try_fuse_lib = pkgcfg.probe("fuse");
+    let try_fuse3_lib = pkgcfg.probe("fuse3");
     let fuse_lib = match (try_fuse_lib, try_fuse3_lib) {
         (Err(err), Err(err3)) => panic!(
             "Failed to find pkg-config modules fuse ({}) or fuse3 ({})",
             err, err3
         ),
-        (Ok(fuse_lib), Err(_)) => fuse_lib,
-        (Err(_), Ok(fuse3_lib)) => fuse3_lib,
-        (Ok(fuse_lib), Ok(fuse3_lib)) => {
+        (Ok(_), Err(_)) => "fuse",
+        (Err(_), Ok(_)) => "fuse3",
+        (Ok(_), Ok(_)) => {
             // Strange situation but we should just try to find the module that is more likely
             // to be the correct one here.
             if api_version < 30 {
-                fuse_lib
+                "fuse"
             } else {
-                fuse3_lib
+                "fuse3"
             }
         }
     };
+    let fuse_lib = pkgcfg.cargo_metadata(true).probe(fuse_lib).unwrap();
 
     // Generate highlevel bindings
     #[cfg(feature = "fuse_highlevel")]
